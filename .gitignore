@@ -4,8 +4,9 @@
 ### Godot ###
 # Godot-specific ignores
 .import/
-export.cfg
-export_presets.cfg
+# these are required for the buildpack to work.
+#export.cfg
+#export_presets.cfg
 
 # Imported translations (automatically generated from CSV files)
 *.translation
