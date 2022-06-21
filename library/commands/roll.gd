@@ -4,28 +4,46 @@ class_name roll
 const help_text := "`roll [formula] [desc]` - Rolls the formula including dice rolls.  Has `kh` and `kl` for advantage and disadvantage.  _Warning: Don't use spaces in your formula, the command parser can't handle that (yet?)._"
 const alias_text := "Aliases: r, roll"
 
-static func do(b : DiscordBot, message : Message, channel := {}, args := []):
+# \s?(\d*d\d+(?:kh|kl)?)|\s?\d|\s?[+\-\*/%^)(]
+const formula_reg := "\\s?(\\d*d\\d+(?:kh|kl)?)|\\s?\\d|\\s?[+\\-\\*/%^)(]"
+const formula_reg_2 := "(?<full>(?:\\s?[+\\-/*%\\(\\)])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d))"
+const short_reg := "(\\d*d\\d*(?:kh|kl)?)"
+
+static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}):
 	
-	# The first arg after we pop the command should be the actual roll.
-	var roll_str = args[0]
-	args.remove(0)
+	# store the roll string locally
+	var roll_str := raw
+	
 	# set up the final result string
-	var _str = str(roll_str)
-	# All remaining args are description of the roll.
-	var desc := ""
-	for i in args:
-		desc += str(i)
-		# this will cap off the description text.
-		if args[args.size()-1] == i:
-			desc += ": "
-		else: desc += " "
-		
-	# phase 1: prepare expression
-	Global.regex.compile("(\\d*d\\d*(?:kh|kl)?)")
+	var _out := ""
+	
+	# get our formula
+	Global.regex.compile(formula_reg_2)
 	var regres = Global.regex.search_all(roll_str)
+	var formula := ""
+	
+	# build the formula
+	for i in regres:
+		formula += i.get_string()
+	
+	# get the desc (everything after the formula)
+	var desc = raw.replace(formula + " ", "") + ": "
+		
+	# slot hte formula in for now
+	_out = formula
+	
+	# prepare to parse individual d?? rolls
+	Global.regex.compile(short_reg)
+	
+	# get all matches
+	regres = Global.regex.search_all(formula)
+	
+	# if we match, then we start parsing rolls.
 	if regres.size() > 0:
+		# every time this function starts parsing rolls,
+		# we randomize to make sure the RNG is functioning well.
 		Global.rng.randomize()
-		#print("We caught some fish in the dice pool.")
+		
 		# loop through the matches
 		for m in regres:
 			# KH = 1, KL = 2, normal = 0
@@ -86,18 +104,32 @@ static func do(b : DiscordBot, message : Message, channel := {}, args := []):
 				
 			
 			# replace string with value
-			roll_str = roll_str.replace(s,str(total))
+			formula = formula.replace(s,str(total))
 			
-			_s += "`" + str(nums)
-			#print(_s)
-			_str = _str.replace(s,_s)
+			# end dice roll formatting.
+			_s += "`"
+			
+			# start number formatting
+			_s += " ["
+			for n in range(nums.size()):
+				var i = nums[n]
+				if i == d or i == 1:
+					_s += "**"+str(i)+"**"
+				else:
+					_s += str(i)
+				if n < nums.size()-1:
+					_s += ", "
+			_s += "]"
+				
+			# Replace items in the formula with numbers as appropriate
+			_out = _out.replace(s,_s)
 		
 	#print(roll_str)
 	# phase 2: parse and execute expression
-	var err = Global.expression.parse(roll_str)
+	var err = Global.expression.parse(formula)
 	if err != OK:
 		# reply with an error message here
-		b.reply(message, "Your formula has errors.  Here was your formula: " + roll_str)
+		b.reply(message, "Your formula has errors.  Here was your formula: " + formula)
 		return
 		
 	var res = Global.expression.execute()
@@ -106,10 +138,12 @@ static func do(b : DiscordBot, message : Message, channel := {}, args := []):
 		b.reply(message, "Encountered an internal error.  Please try again.")
 		return
 		
-	if _str.length() > 512:
-		_str = _str.substr(0, 512) + " **...** "
-	#_str = _str.substr(0, 1000)
-		
-	desc += _str + " **= " +str(res) + "**"
-	# testing - send what we received for desc
-	b.reply(message, desc)
+	# prune the length so that we don't websocket error.
+	if _out.length() > 512:
+		_out = _out.substr(0, 512) + " **...** "
+
+	# prep final output
+	_out = desc + _out + " **= " +str(res) + "**"
+	
+	# output message response
+	b.reply(message, _out)

@@ -9,42 +9,29 @@ const commands := {
 }
 
 static func parse(b : DiscordBot, raw : String, message : Message, channel : Dictionary) -> void:
-	# generate varargs
-	var tokens = generate_tokens(raw)
 	
-	# comand is always first argument
-	var cmd = tokens[0].to_lower()
-	tokens.remove(0)
+	# Get command.
+	# match all characters up to the first whitespace.
+	Global.regex.compile("^[^\\s]+")
+	var cmd = Global.regex.search(raw).get_string().to_lower()
 	
+	# strip the command and the leading space from the raw data
+	raw = raw.lstrip(cmd + " ")
 	# send to the handler
-	handle_command(b, message, channel, cmd, tokens)
-	
-static func generate_tokens(raw_content: String) -> Array:
-	"""
-	This is a helper function which takes a string, and splits it using the space character into an Array
-	Eg. "hello hi" -> ["hello", "hi"]
-	Eg. "hello      hi" -> ["hello", "hi"]
-	"""
-	var tokens = []
-	var r = RegEx.new()
-	r.compile("\\S+") # Negated whitespace character class
-	for token in r.search_all(raw_content):
-		tokens.append(token.get_string())
-
-	return tokens
+	handle_command(b, message, raw, channel, cmd)
 	
 ### HANDLER ###
 
-static func handle_command(b : DiscordBot, message: Message, channel: Dictionary, cmd : String, args : Array) -> void:
+static func handle_command(b : DiscordBot, message: Message, raw : String, channel: Dictionary, cmd : String) -> void:
 	match cmd:
 		"ping":
-			ping.do(b,message,channel)
+			ping.do(b,message)
 		"prefix":
-			prefix.do(b,message,{},args)
+			prefix.do(b,message,raw,{})
 		"r":
-			roll.do(b,message,{},args)
+			roll.do(b,message,raw,{})
 		"roll":
-			roll.do(b,message,{},args)
+			roll.do(b,message,raw,{})
 		"help":
 			b.reply(message, print_help())
 			#help.d9(b,message,{},[])

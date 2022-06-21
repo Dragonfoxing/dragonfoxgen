@@ -525,6 +525,23 @@ func _handle_events(dict: Dictionary) -> void:
 			# Update cache
 			guilds[guild.id] = guild
 
+		# Added in by @Dragonfoxing
+		"GUILD_UPDATE":
+			var guild = dict.d
+			_clean_guilds([guild])
+			
+			if guild.has('lazy') and guild.lazy:
+				guilds_loaded += 1
+				if guilds_loaded == guilds.size():
+					emit_signal('bot_ready', self)
+
+			if not guilds.has(guild.id):
+				# Joined a new guild
+				emit_signal('guild_create', self, guild)
+
+			# Update cache
+			guilds[guild.id] = guild
+			
 		'GUILD_DELETE':
 			var guild = dict.d
 			guilds.erase(guild.id)

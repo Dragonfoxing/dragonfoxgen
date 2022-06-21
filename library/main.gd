@@ -14,10 +14,6 @@ onready var _intent : int = intents.build_intent([
 	"direct_messages"
 ])
 
-# necessary componenets
-
-
-
 # OnReady.
 func _ready() -> void:
 	bot = $DiscordBot
@@ -54,13 +50,16 @@ func _get_token() -> String:
 func _connect_signals(b : DiscordBot) -> void:
 	b.connect("bot_ready", self, "_on_bot_ready")
 	b.connect("message_create", self, "_message_received")
-	pass
+	#b.connect("guild_update", self, "_guild_updated")
 	
 ### BOT LIFECYCLE ###
 
 func _on_bot_ready(b : DiscordBot) -> void:
 	print("Successfully connected.  Setting presence.")
 	_set_presence(b)
+	
+func _guild_updated(b : DiscordBot, guild : Dictionary):
+	print("A guild updated!")
 	
 func _message_received(b : DiscordBot, message : Message, channel : Dictionary) -> void:
 	# get the guild prefix
