@@ -5,7 +5,7 @@ class_name prefixes
 # We will also store the prefix as a string.
 # So keys
 const guild_prefix = {}
-const standard_prefix = "!"
+const standard_prefix = "gd."
 
 static func add_or_change_prefix(gid : String, pre : String):
 	guild_prefix[gid] = pre
