@@ -6,7 +6,8 @@ const alias_text := "Aliases: r, roll"
 
 # \s?(\d*d\d+(?:kh|kl)?)|\s?\d|\s?[+\-\*/%^)(]
 const formula_reg := "\\s?(\\d*d\\d+(?:kh|kl)?)|\\s?\\d|\\s?[+\\-\\*/%^)(]"
-const formula_reg_2 := "(?<full>(?:\\s?[+\\-/*%\\(\\)])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d))"
+# ((?:\s?[+\-/*%])|(\s?\d*d{1}\d+(?:kl|kh)?)|(?:\s?\d)|(?:\s?[\(\)][\s?\d?]))
+const formula_reg_2 := "((?:\\s?[+\\-/*%])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d)|(?:\\s?[\\(\\)][\\s?\\d?]))"
 const short_reg := "(\\d*d\\d*(?:kh|kl)?)"
 
 static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}):
