@@ -84,6 +84,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://library/commands/command_handler.gd"
 }, {
+"base": "Reference",
+"class": "formula",
+"language": "GDScript",
+"path": "res://library/types/formula.gd"
+}, {
 "base": "Node",
 "class": "help",
 "language": "GDScript",
@@ -93,6 +98,11 @@ _global_script_classes=[ {
 "class": "intents",
 "language": "GDScript",
 "path": "res://library/helpers/intents.gd"
+}, {
+"base": "Reference",
+"class": "operation",
+"language": "GDScript",
+"path": "res://library/types/operation.gd"
 }, {
 "base": "Node",
 "class": "ping",
@@ -135,8 +145,10 @@ _global_script_class_icons={
 "SelectMenu": "",
 "User": "",
 "command_handler": "",
+"formula": "",
 "help": "",
 "intents": "",
+"operation": "",
 "ping": "",
 "prefix": "",
 "prefixes": "",

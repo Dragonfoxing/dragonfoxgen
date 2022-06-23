@@ -1,44 +1,84 @@
 extends Node
 class_name roll
 
-const help_text := "`roll [formula] [desc]` - Rolls the formula including dice rolls.  Has `kh` and `kl` for advantage and disadvantage.  Single spaces between formula parts are supported."
+const help_text := "`roll [_f] [desc]` - Rolls the _f including dice rolls.  Has `kh` and `kl` for advantage and disadvantage.  Single spaces between _f parts are supported."
 const alias_text := "Aliases: r, roll"
 
 # \s?(\d*d\d+(?:kh|kl)?)|\s?\d|\s?[+\-\*/%^)(]
-const formula_reg := "\\s?(\\d*d\\d+(?:kh|kl)?)|\\s?\\d|\\s?[+\\-\\*/%^)(]"
+const _f_reg := "\\s?(\\d*d\\d+(?:kh|kl)?)|\\s?\\d|\\s?[+\\-\\*/%^)(]"
 # ((?:\s?[+\-/*%])|(\s?\d*d{1}\d+(?:kl|kh)?)|(?:\s?\d)|(?:\s?[\(\)][\s?\d?]))
-const formula_reg_2 := "((?:\\s?[+\\-/*%])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d)|(?:\\s?[\\(\\)][\\s?\\d?]))"
+const _f_reg_2 := "((?:\\s?[+\\-/*%])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d)|(?:\\s?[\\(\\)][\\s?\\d?]))"
 const short_reg := "(\\d*d\\d*(?:kh|kl)?)"
 
 static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}):
 	
-	# store the roll string locally
-	var roll_str := raw
-	
+	if raw == "" or not raw:
+		b.reply(message,"You didn't pass in anything to roll.")
+		return
+		
 	# set up the final result string
 	var _out := ""
 	
 	# get our formula
-	Global.regex.compile(formula_reg_2)
-	var regres = Global.regex.search_all(roll_str)
-	var formula := ""
+	Global.regex.compile(_f_reg_2)
 	
-	# build the formula
-	for i in regres:
-		formula += i.get_string()
+	var regres = Global.regex.search_all(raw)
 	
-	# get the desc (everything after the formula)
-	var desc = raw.replace(formula + " ", "") + ": "
+	if regres.size() < 1:
+		b.reply(message,"You didn't pass in anything to roll.")
+		return
 		
-	# slot hte formula in for now
-	_out = formula
+	var frm = formula.new()
+	
+	# recombine the formula
+	for r in regres:
+		frm.statement += r.get_string()
+		
+	# strip all spaces
+	frm.statement = frm.statement.replace(" ", "")
+	
+	# standardize case (for KH, KL)
+	frm.statement = frm.statement.to_lower()
+	
+	# temp varible for not
+	var _f : String = frm.statement
+	
+	# Divide by zero error checking.
+	if _f.find("/0") > -1:
+		b.reply(message, "Your formula would divide by zero.  Here is your formula: " + frm.statement)
+		return
+	
+	# get the desc (everything after the formula and trailing space)
+	var desc = raw.replace(_f + " ", "") + ": "
+		
+	# slot hte _f in for now
+	_out = _f
 	
 	# prepare to parse individual d?? rolls
 	Global.regex.compile(short_reg)
 	
 	# get all matches
-	regres = Global.regex.search_all(formula)
+	regres = Global.regex.search_all(_f)
 	
+	# take all of the special results and stuff them in their own operations.
+	if regres.size() > 0:
+		for r in regres:
+			var op : operation = operation.new()
+			op.statement = r.get_string()
+			op.position = r.get_start()
+			frm.operations.append(op)
+			
+	for op in frm.operations:
+		op = op as operation
+		var flag = 0
+		if op.statement.find("kh") > -1:
+			flag = 1
+		elif op.statement.find("kl") > -1:
+			flag = -1
+		op.statement = op.statement.lstrip("khl")
+		
+		var args = op.stateent.split("d")
+		
 	# if we match, then we start parsing rolls.
 	if regres.size() > 0:
 		# every time this function starts parsing rolls,
@@ -77,7 +117,7 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 			else: d = int(d)
 			
 			# set up the number array
-			var nums = []
+			var nums : PoolIntArray = []
 			
 			# set up the final total to use in the expression
 			var total = 0
@@ -106,10 +146,10 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 							total = i
 					_s += "KL"
 				
-			# replace items in the formula with appropriate totals
-			var p_start = formula.find(s)
-			formula.erase(p_start, len(s))
-			formula = formula.insert(p_start,str(total))
+			# replace items in the _f with appropriate totals
+			var p_start = _f.find(s)
+			_f.erase(p_start, len(s))
+			_f = _f.insert(p_start,str(total))
 			
 			# end dice roll formatting.
 			_s += "`"
@@ -137,13 +177,13 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 			_out.erase(p_start,len(s))
 			_out = _out.insert(p_start,_s)
 		
-	print(formula)
+	print(_f)
 	
 	# phase 2: parse and execute expression
-	var err = Global.expression.parse(formula)
+	var err = Global.expression.parse(_f)
 	if err != OK:
 		# reply with an error message here
-		b.reply(message, "Your formula has errors.  Here was your formula: " + formula)
+		b.reply(message, "Your _f has errors.  Here was your _f: " + _f)
 		return
 		
 	var res = Global.expression.execute()

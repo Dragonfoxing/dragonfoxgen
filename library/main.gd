@@ -16,14 +16,19 @@ onready var _intent : int = intents.build_intent([
 
 # OnReady.
 func _ready() -> void:
+	# grab bot
 	bot = $DiscordBot
 	
+	# set our token secret
 	bot.TOKEN = _get_token()
 	
+	# set our intents
 	bot.INTENTS = _intent
+	
 	# INTENTS for this bot should be 4609
 	# That's guild, guild messages, and direct messages
-	print("Bot intents = " + str(bot.INTENTS))
+	#print("Bot intents = " + str(bot.INTENTS))
+	# connect our signals.
 	_connect_signals(bot)
 	
 	bot.login()
@@ -32,11 +37,14 @@ func _get_token() -> String:
 	# Try to open file
 	var file = File.new()
 	var err = file.open("res://secret.token", File.READ)
+	
 	# prep token string
 	var token := ""
+	
 	# try to get the data
 	if err == OK:
 		token = file.get_as_text()
+		
 	# if the data couldn't be read or wasn't available
 	# then check for the token in ENV
 	if token == null or token == "":
@@ -48,45 +56,69 @@ func _get_token() -> String:
 	return token
 
 func _connect_signals(b : DiscordBot) -> void:
+	# connect to the function that will set our status.
 	b.connect("bot_ready", self, "_on_bot_ready")
+	
+	# this is for the bulk of our bot.
 	b.connect("message_create", self, "_message_received")
-	#b.connect("guild_update", self, "_guild_updated")
 	
 ### BOT LIFECYCLE ###
 
 func _on_bot_ready(b : DiscordBot) -> void:
-	print("Successfully connected.  Setting presence.")
+	#print("Successfully connected.  Setting presence.")
 	_set_presence(b)
 	
-func _guild_updated(b : DiscordBot, guild : Dictionary):
-	print("A guild updated!")
-	
 func _message_received(b : DiscordBot, message : Message, channel : Dictionary) -> void:
-	# get the guild prefix
-	var g_pre := prefixes.get_guild_prefix(message.guild_id)
-	
-	# Don't respond to other bots, ideally.
-	# Or do and make a meme of it.
+	# don't allow responding to bots.
 	if message.author.bot:
 		return
-		
-	# make sure this is actually a command.
-	# also, check against our table of guild specific prefixes.
-	if not message.content.begins_with(g_pre):
-		return
 	
-	# pop the prefix off the content
-	var raw := message.content.lstrip(g_pre)
+	# grab the raw content
+	var raw : String = message.content
+	
+	# check for the prefix.
+	var pre : String = prefixes.get_guild_prefix(message.guild_id)
+	
+	# if we are in DMs, bypass all of this logic.
+	if not message.guild_id == "":
+		# Then check if we got pinged.
+		if _check_mentioned(b, message):
+			# Trim our user ID if necessary.
+			raw = raw.trim_prefix("<@"+b.user.id+">")
+			raw = raw.trim_prefix(" ")
+		else:
+			# This is in a server then.  Check if it begins with our prefix.
+			if not raw.begins_with(pre):
+				return
+	
+	# trim the prefix, if any.
+	# this will trim nothing if there is no prefix.
+	raw = raw.trim_prefix(pre)
 	
 	# send this to the command handler
 	command_handler.parse(b, raw, message, channel)
 
+func _check_mentioned(b : DiscordBot, message : Message) -> bool:
+	# return early if there are no mentions
+	if message.mentions.size() < 0: return false
+	# loop through and return early if a mention matches our user id
+	else:
+		for u in message.mentions:
+			if u.id == b.user.id:
+				return true
+		return false
+		
 func _set_presence(b : DiscordBot) -> void:
+	# set our presence
+	# idk why afk is separate from status
+	# type = game for almost all integrations
 	b.set_presence({
 		"status": "online",
 		"afk": "false",
 		"activity": {
 			"type": "game",
-			"name": "%r to roll some dice uwu"
+			# make sure that our standard prefix is used
+			# we can't update this presence per server though
+			"name": prefixes.standard_prefix + "help"
 		}
 	})

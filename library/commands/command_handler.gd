@@ -13,10 +13,11 @@ static func parse(b : DiscordBot, raw : String, message : Message, channel : Dic
 	# Get command.
 	# match all characters up to the first whitespace.
 	Global.regex.compile("^[^\\s]+")
+	#print(raw)
 	var cmd = Global.regex.search(raw).get_string().to_lower()
-	
 	# strip the command and the leading space from the raw data
-	raw = raw.lstrip(cmd + " ")
+	# lstrip stripped all characters in the string so let's fix this.
+	raw = raw.trim_prefix(cmd + " ")
 	# send to the handler
 	handle_command(b, message, raw, channel, cmd)
 	
@@ -35,6 +36,8 @@ static func handle_command(b : DiscordBot, message: Message, raw : String, chann
 		"help":
 			b.reply(message, print_help())
 			#help.d9(b,message,{},[])
+		_:
+			b.reply(message, "You didn't supply a valid command.")
 
 static func print_help() -> String:
 	var nl := "\n"
@@ -42,6 +45,7 @@ static func print_help() -> String:
 	text += nl + nl + "A really cool dice rolling bot.  Now 20% furrier!"
 	text += nl + "DragonfoxGen is made and supported by @dragonfoxing"
 	text += nl + "The base for the bot icon is by raroberts19 on DA"
+	text += nl + nl + "All commands can be used without prefix by pinging the bot, or in DMs."
 	text += nl + nl + "**= Command List =**" + nl
 	
 	for i in commands:
