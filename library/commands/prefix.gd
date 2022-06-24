@@ -25,6 +25,11 @@ const reject_chars : Array = [
 ]
 
 static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}) -> void:
+	# this is being called in DMs and should be ignored
+	if message.guild_id == "":
+		b.reply(message, "You can't change the global prefix.  Nice try though ;)")
+		return
+		
 	# ensure the user receives feedback
 	var tok = tokens.generate(raw)
 	
