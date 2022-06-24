@@ -77,7 +77,7 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 			flag = -1
 		op.statement = op.statement.lstrip("khl")
 		
-		var args = op.stateent.split("d")
+		var args = op.statement.split("d")
 		
 	# if we match, then we start parsing rolls.
 	if regres.size() > 0:
