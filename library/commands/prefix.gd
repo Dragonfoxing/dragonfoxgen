@@ -10,6 +10,9 @@ const bad_chars : Array = [
 	"`",
 	"|",
 	"/",
+	# new addition - backspace is also an escape char in Discord
+	# and I want prefix replacements to be clearly communicated.
+	"\\",
 	">",
 	"<",
 	" ",
