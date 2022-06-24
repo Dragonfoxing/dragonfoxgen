@@ -7,7 +7,8 @@ const alias_text := "Aliases: r, roll"
 # \s?(\d*d\d+(?:kh|kl)?)|\s?\d|\s?[+\-\*/%^)(]
 const _f_reg := "\\s?(\\d*d\\d+(?:kh|kl)?)|\\s?\\d|\\s?[+\\-\\*/%^)(]"
 # ((?:\s?[+\-/*%])|(\s?\d*d{1}\d+(?:kl|kh)?)|(?:\s?\d)|(?:\s?[\(\)][\s?\d?]))
-const _f_reg_2 := "((?:\\s?[+\\-/*%])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d)|(?:\\s?[\\(\\)][\\s?\\d?]))"
+# [\s?\d?] doesn't work b/c it interprets ? as the character
+const _f_reg_2 := "((?:\\s?[+\\-/*%])|(\\s?\\d*d{1}\\d+(?:kl|kh)?)|(?:\\s?\\d)|(?:\\s?[\\(\\)]\\s?\\d?))"
 const short_reg := "(\\d*d\\d*(?:kh|kl)?)"
 
 static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}):
