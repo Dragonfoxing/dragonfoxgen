@@ -1,7 +1,17 @@
 extends Reference
 class_name formula
 
-# The full formula as given
+# raw statement
 var statement : String
-# The pre-processed set of operations
-var operations : Array = []
+
+# processed statement
+var processed : String
+
+# list of operations in the formula
+var operations : Array
+
+# the descriptor string, if available
+var desc : String
+
+# the final integer result
+var result : int

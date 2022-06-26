@@ -64,11 +64,13 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 	# take all of the special results and stuff them in their own operations.
 	if regres.size() > 0:
 		for r in regres:
+			"""
 			var op : operation = operation.new()
 			op.statement = r.get_string()
 			op.position = r.get_start()
 			frm.operations.append(op)
-			
+			"""
+	"""
 	for op in frm.operations:
 		op = op as operation
 		var flag = 0
@@ -79,7 +81,7 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 		op.statement = op.statement.lstrip("khl")
 		
 		var args = op.statement.split("d")
-		
+	"""	
 	# if we match, then we start parsing rolls.
 	if regres.size() > 0:
 		# every time this function starts parsing rolls,
@@ -184,7 +186,7 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 	var err = Global.expression.parse(_f)
 	if err != OK:
 		# reply with an error message here
-		b.reply(message, "Your _f has errors.  Here was your _f: " + _f)
+		b.reply(message, "Your formula has errors.  Here was your formula: " + _f)
 		return
 		
 	var res = Global.expression.execute()

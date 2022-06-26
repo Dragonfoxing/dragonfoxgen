@@ -125,6 +125,16 @@ _global_script_classes=[ {
 "path": "res://library/commands/roll.gd"
 }, {
 "base": "Node",
+"class": "roll_par",
+"language": "GDScript",
+"path": "res://library/helpers/roll_parser.gd"
+}, {
+"base": "Node",
+"class": "roll_pre",
+"language": "GDScript",
+"path": "res://library/helpers/roll_preprocessor.gd"
+}, {
+"base": "Node",
 "class": "tokens",
 "language": "GDScript",
 "path": "res://library/helpers/tokens.gd"
@@ -153,6 +163,8 @@ _global_script_class_icons={
 "prefix": "",
 "prefixes": "",
 "roll": "",
+"roll_par": "",
+"roll_pre": "",
 "tokens": ""
 }
 
