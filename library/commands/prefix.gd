@@ -27,7 +27,7 @@ const reject_chars : Array = [
 static func do(b : DiscordBot, message : Message, raw : String = "", channel := {}) -> void:
 	# this is being called in DMs and should be ignored
 	if message.guild_id == "":
-		b.reply(message, "You can't change the global prefix.  Nice try though ;)")
+		b.reply(message, "You can't change the prefix in DMs.")
 		return
 		
 	# ensure the user receives feedback
@@ -48,6 +48,9 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 	
 	if pre == "":
 		b.reply(message, "Rejected change, string contained only the following before sanitization: `" + str(bad_chars) +"`")
+		return
+	elif len(pre) > 5:
+		b.reply(message, "Your prefix should be 5 characters or less.")
 		return
 	
 	b.reply(message, "Setting prefix to " + pre)

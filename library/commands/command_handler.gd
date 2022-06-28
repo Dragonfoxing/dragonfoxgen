@@ -14,7 +14,14 @@ static func parse(b : DiscordBot, raw : String, message : Message, channel : Dic
 	# match all characters up to the first whitespace.
 	Global.regex.compile("^[^\\s]+")
 	#print(raw)
-	var cmd = Global.regex.search(raw).get_string().to_lower()
+	var cmd = Global.regex.search(raw)
+	if cmd and cmd.get_string() != "":
+		cmd = cmd.get_string().to_lower()
+	else:
+		# silently fail.
+		#b.reply(message, "You didn't supply a command.")
+		return
+		
 	# strip the command and the leading space from the raw data
 	# lstrip stripped all characters in the string so let's fix this.
 	raw = raw.trim_prefix(cmd + " ")
@@ -37,7 +44,9 @@ static func handle_command(b : DiscordBot, message: Message, raw : String, chann
 			b.reply(message, print_help())
 			#help.d9(b,message,{},[])
 		_:
-			b.reply(message, "You didn't supply a valid command.")
+			#b.reply(message, "You didn't supply a valid command.")
+			# fail silently
+			return
 
 static func print_help() -> String:
 	var nl := "\n"
@@ -54,5 +63,6 @@ static func print_help() -> String:
 			text += nl + o.help_text
 		if "alias_text" in o:
 			text += nl + o.alias_text
+		text += nl
 	
 	return text

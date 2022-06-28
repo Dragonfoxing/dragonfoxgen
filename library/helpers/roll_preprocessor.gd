@@ -6,7 +6,13 @@ const strip_patterns : Array = [
 	# This is to strip user pings out of the message.
 	"(<@\\d+>)",
 	# Same but channel slug.
-	"(<#\\d+>)"
+	"(<#\\d+>)",
+	# strip any spoiler bars
+	"\\|*",
+	# strip any italics
+	"[_]*",
+	# strip any bold
+	"\\**"
 ]
 
 const operation_types : Dictionary = {
@@ -20,10 +26,10 @@ const operation_types : Dictionary = {
 # This lookbehind statement lets us capture only the description at the end
 # Descriptions at the beginning will likely be ignored.
 const desc_pattern : String = "(\\b\\D+)(?<=[^\\s+\\-@/*%()dkhl<>])"
-
+#const desc_pattern : String = "\\B((?:\\s?\\w+)+)"
 # This pattern captures operational statements in order.
 # Pare = sub-operation, dice = dice roll, digi = integer, oper = operator
-const operation_pattern : String = "(?<pare>\\({1}[\\d+\\-/*%()dkhl]+\\){1})|(?<dice>\\d*d{1}\\d*(?:kh|kl)?)|(?<digi>\\d+)|(?<oper>[+\\-/*])"
+const operation_pattern : String = "(?<pare>\\({1}[\\d+\\-/*%()dkhl]+\\){1})|(?<dice>\\d*d{1}\\d+(?:kh|kl)?)|(?<digi>\\d+)|(?<oper>[+\\-/*])"
 
 ### PRIMARY FUNCTIONS ###
 
@@ -132,12 +138,14 @@ static func _process_formula(_f : formula, _r : RegEx = RegEx.new()):
 
 static func _clean_raw(_f : formula, _r : RegEx = RegEx.new()):
 	# debug print: raw in
-	print("Raw input: " + _f.processed)
+	#print("Raw input: " + _f.processed)
 	
 	# for all bad pataterns, strip from text
 	for pattern in strip_patterns:
 		# compile pattern
-		_r.compile(pattern)
+		
+		if _r.compile(pattern) != OK:
+			print("Regex error: " + pattern)
 		
 		# get results
 		var res = _r.search_all(_f.processed)
@@ -147,7 +155,7 @@ static func _clean_raw(_f : formula, _r : RegEx = RegEx.new()):
 			_f.processed = _f.processed.replace(r.get_string(), "")
 			
 	# debug print: userid slug removal
-	print("Slug removed: " + _f.processed)
+	#print("Slug removed: " + _f.processed)
 
 static func _strip_words(_f : formula, _r : RegEx = RegEx.new()):
 	# this catches all words of one or more characters.
@@ -175,25 +183,36 @@ static func _strip_words(_f : formula, _r : RegEx = RegEx.new()):
 # OTHER #
 
 static func _process_desc(_f : formula, _r : RegEx = RegEx.new()):
-	# compile descriptor pattern
-	_r.compile(desc_pattern)
-	
-	# get result
-	var rez = _r.search(_f.processed)
-	var res
-	if rez and rez != null:
-		res = rez.get_string()
+	var find = _f.processed.find(";")
+	if find > -1:
+		# we have a delimiter.
+		_f.desc = _f.processed.substr(find+1).trim_prefix(" ")
+		print(_f.desc)
+		_f.processed = _f.processed.substr(0, find)
+		print(_f.processed)
+	"""
+	else:
 		
-	# if result exists and is not empty, process it
-	if res and not res == "":
-		# process the string further
-		_f.processed = _f.processed.replace(res, "")
+		# compile descriptor pattern
+		_r.compile(desc_pattern)
 		
-		#store the descriptor
-		_f.desc = res.lstrip(" ")
-		
-		# print description on its own
-		print("Description: " + _f.desc)
+		# get result
+		var rez = _r.search_all(_f.processed)
+		var res
+		if rez.size() > 0:
+			res = rez[rez.size()-1].get_string()
+			
+		# if result exists and is not empty, process it
+		if res and not res == "":
+			# process the string further
+			_f.processed = _f.processed.replace(res, "")
+			
+			#store the descriptor
+			_f.desc = res.lstrip(" ")
+			
+			# print description on its own
+			print("Description: " + _f.desc)
+	"""
 	
 static func print_formula(_f : formula) -> String:
 	var _s = ""

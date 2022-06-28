@@ -33,6 +33,9 @@ func _ready() -> void:
 	
 	bot.login()
 	
+func _exit_tree() -> void:
+	_set_presence(bot, "offline", "crashing or offline")
+	
 func _get_token() -> String:
 	# Try to open file
 	var file = File.new()
@@ -108,17 +111,17 @@ func _check_mentioned(b : DiscordBot, message : Message) -> bool:
 				return true
 		return false
 		
-func _set_presence(b : DiscordBot) -> void:
+func _set_presence(b : DiscordBot, status : String = "online", activity : String = prefixes.standard_prefix + "help") -> void:
 	# set our presence
 	# idk why afk is separate from status
 	# type = game for almost all integrations
 	b.set_presence({
-		"status": "online",
+		"status": status,
 		"afk": "false",
 		"activity": {
 			"type": "game",
 			# make sure that our standard prefix is used
 			# we can't update this presence per server though
-			"name": prefixes.standard_prefix + "help"
+			"name": activity
 		}
 	})
