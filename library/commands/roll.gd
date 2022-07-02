@@ -47,8 +47,9 @@ static func do(b : DiscordBot, message : Message, raw : String = "", channel := 
 	
 	_out += " **= " + str(_f.result) + "**"
 	
-	if err == roll_par.ERROR_DICE_TOO_SMALL or err == roll_par.ERROR_DICE_TOO_HIGH or err == roll_par.ERROR_DICE_DUMBNESS:
-		_out += " [Dice rolls were sanitized for this formula]"
+	#if err == roll_par.ERROR_DICE_TOO_SMALL or err == roll_par.ERROR_DICE_TOO_HIGH or err == roll_par.ERROR_DICE_DUMBNESS:
+		
+		#_out += " [Dice rolls were sanitized for this formula]"
 	
 	b.reply(message, _out)
 
