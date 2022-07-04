@@ -80,6 +80,11 @@ _global_script_classes=[ {
 "path": "res://addons/discord_gd/classes/user.gd"
 }, {
 "base": "Node",
+"class": "bot_db",
+"language": "GDScript",
+"path": "res://library/helpers/database.gd"
+}, {
+"base": "Node",
 "class": "command_handler",
 "language": "GDScript",
 "path": "res://library/commands/command_handler.gd"
@@ -154,6 +159,7 @@ _global_script_class_icons={
 "PostgreSQLClient": "",
 "SelectMenu": "",
 "User": "",
+"bot_db": "",
 "command_handler": "",
 "formula": "",
 "help": "",
@@ -181,7 +187,7 @@ Global="*res://library/global.gd"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/discord_gd/plugin.cfg", "res://addons/godot-sqlite/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/discord_gd/plugin.cfg" )
 
 [physics]
 

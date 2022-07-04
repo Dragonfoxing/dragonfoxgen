@@ -3,6 +3,8 @@ extends Node
 # Store our bot reference.
 var bot : DiscordBot
 
+onready var db := bot_db.new()
+
 # Remove this and replace with whatever is required for Heroku/Github secrets.
 #var live_token := "OTg3NDgxODkxODU2ODc1NjEw.Gdcp__.b-HQHvt0K1Oa7qm3mjKmQfjHv1sIVnpLYu3QFA"
 
@@ -16,6 +18,17 @@ onready var _intent : int = intents.build_intent([
 
 # OnReady.
 func _ready() -> void:
+	# check database shit
+	db.start()
+	
+	# set up the bot
+	_start_bot()
+	
+	
+func _exit_tree() -> void:
+	_set_presence(bot, "offline", "crashing or offline")
+	
+func _start_bot() -> void:
 	# grab bot
 	bot = $DiscordBot
 	
@@ -32,9 +45,6 @@ func _ready() -> void:
 	_connect_signals(bot)
 	
 	bot.login()
-	
-func _exit_tree() -> void:
-	_set_presence(bot, "offline", "crashing or offline")
 	
 func _get_token() -> String:
 	# Try to open file
