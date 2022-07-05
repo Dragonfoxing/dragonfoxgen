@@ -36,10 +36,12 @@ func _setup_postgre_db():
 func _setup_postgre_table_prefixes():
 	print("Creating table [prefixes] if it doesn't already exist.")
 	var setup := """
+	BEGIN;
 	CREATE TABLE IF NOT EXISTS prefixes (
 		gid varchar(30) PRIMARY KEY NOT NULL,
 		prefix varchar(5)
-	)
+	);
+	COMMIT;
 	"""
 	
 	print("Database status: " + str(gre_db.parameter_status))
