@@ -3,7 +3,7 @@ class_name command_handler
 
 const commands := {
 	"roll": roll,
-	"prefix": prefix,
+	#"prefix": prefix,
 	"ping": ping,
 	"help": help
 }
@@ -34,8 +34,8 @@ static func handle_command(b : DiscordBot, message: Message, raw : String, chann
 	match cmd:
 		"ping":
 			ping.do(b,message)
-		"prefix":
-			prefix.do(b,message,raw,{})
+		#"prefix":
+			#prefix.do(b,message,raw,{})
 		"r":
 			roll.do(b,message,raw,{})
 		"roll":

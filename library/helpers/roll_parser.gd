@@ -144,36 +144,45 @@ static func _process_dice(op : operation) -> int:
 	
 	var res : int = 0
 	
-	op.output = str(num) + "d" + str(size) + "["
-	
-	var ind = 0
-	var ind_max = 10
-	if num < ind_max:
-		ind_max = num
+	if num > 1:
 		
-	for i in num:
-		ind += 1
-		#print(i)
-		var _n = rng.randi_range(1,size)
-		match _flag:
-			0:
-				res += _n
-				
-				op.output += format_num_array(_n, num, ind, ind_max)
-			1:
-				res = _n
-				
-				op.output += format_num_array(_n, num, ind, ind_max)
-				if _n == size:
-					break
-			2:
-				res = _n
-				
-				op.output += format_num_array(_n, num, ind, ind_max)
-				if _n == 1:
-					break
-	op.output += "] (" + str(res) + ")"
-	
+		op.output = str(num) + "d" + str(size) + "["
+		
+		var ind = 0
+		var ind_max = 10
+		if num < ind_max:
+			ind_max = num
+			
+		for i in num:
+			ind += 1
+			#print(i)
+			var _n = rng.randi_range(1,size)
+			match _flag:
+				0:
+					res += _n
+					
+					op.output += format_num_array(_n, num, ind, ind_max)
+				1:
+					res = _n
+					
+					op.output += format_num_array(_n, num, ind, ind_max)
+					if _n == size:
+						break
+				2:
+					res = _n
+					
+					op.output += format_num_array(_n, num, ind, ind_max)
+					if _n == 1:
+						break
+		op.output += "] (" + str(res) + ")"
+	else:
+		op.output += str(num) + "d" + str(size)
+		
+		var _n = rng.randi_range(1, size)
+		
+		op.output += "(" + str(_n) + ")"
+		
+		res = _n
 	print(op.output)
 	#print("Roll: " + str(num) + "d" + str(size) + " = " + str(res))
 	
