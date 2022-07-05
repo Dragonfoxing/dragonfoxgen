@@ -25,6 +25,9 @@ func _do_setup():
 	
 	error = gre_db.connect_to_host(gre_url)
 	
+	if error != OK:
+		print_debug("We couldn't connect to the postgre database.")
+	
 func _connect_signals() -> void:
 	error = gre_db.connect("authentication_error", self, "_auth_error")
 	error = gre_db.connect("connection_established", self, "_connected")
