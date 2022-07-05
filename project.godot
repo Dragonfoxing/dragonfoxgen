@@ -193,7 +193,7 @@ Global="*res://library/global.gd"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/discord_gd/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/discord_gd/plugin.cfg", "res://addons/godot-sqlite/plugin.cfg" )
 
 [physics]
 
