@@ -22,3 +22,6 @@ data_*/
 
 # Don't upload Krita files.
 *.kra
+
+# don't upload builds.
+builds/
